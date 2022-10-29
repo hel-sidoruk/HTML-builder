@@ -7,10 +7,10 @@ const destinationFolder = path.join(__dirname, 'project-dist');
 
 async function createBuild() {
   await mkdir(destinationFolder, { recursive: true });
-  // clearDirectory(destinationFolder);
+  await clearDirectory(destinationFolder);
+  copyAssets();
   getHtml();
   mergeStyles();
-  copyAssets();
 }
 
 function createBundle(filesArray) {
@@ -64,14 +64,17 @@ function writeHtmlFile(html) {
 }
 
 async function clearDirectory(folder) {
-  const filesInNewFolder = await readdir(folder, { withFileTypes: true });
-  for (const file of filesInNewFolder) {
-    file.isFile()
-      ? await unlink(path.join(folder, file.name))
-      : clearDirectory(path.join(folder, file.name));
-  }
-  if (folder !== destinationFolder) {
-    await rmdir(folder);
+  const existingFiles = await readdir(folder, { withFileTypes: true });
+  for (const file of existingFiles) {
+    if (file.isFile()) {
+      await unlink(path.join(folder, file.name));
+      if (existingFiles.indexOf(file) === existingFiles.length - 1 && folder !== destinationFolder) {
+        await rmdir(folder);
+      }
+    } else {
+      await clearDirectory(path.join(folder, file.name));
+      await readdir(folder).then(async files => !files.length && await rmdir(folder));
+    }
   }
 }
 
