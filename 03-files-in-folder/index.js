@@ -7,7 +7,7 @@ async function showFileInfo(fileName) {
   try {
     const { name, ext } = path.parse(fileName);
     const { size } = await stat(path.join(__dirname, folderName, fileName));
-    console.log(`${name} - ${ext.replace('.', '')} - ${size / 1024}kb`);
+    console.log(`${name} - ${ext.replace('.', '')} - ${size} bytes`);
   } catch (err) {
     console.error('Произошла ошибка: ', err);
   }
